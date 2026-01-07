@@ -223,7 +223,7 @@ function Background3D() {
         width: "100%",
         height: "100%",
         zIndex: 0,
-        background: "#fafafa",
+        // background: "#fafafa",
         pointerEvents: "none",
       }}
     />
