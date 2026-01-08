@@ -4,7 +4,26 @@ function Hero() {
   const words = ["Build", "Design", "Launch", "Scale", "Grow"];
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
   const heroRef = useRef(null);
+  const heroVisibleRef = useRef(true);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        heroVisibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.1 }
+    );
+
+    if (heroRef.current) observer.observe(heroRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -56,9 +75,16 @@ function Hero() {
       vx: (Math.random() - 0.5) * 0.4,
       vy: (Math.random() - 0.5) * 0.4,
     }));
+    let lastTime = 0;
+    const now = performance.now();
+    if (now - lastTime < 33) {
+      animationRef.current = requestAnimationFrame(animate);
+      return;
+    }
+    lastTime = now;
 
     const animate = () => {
-      if (isPausedRef.current) {
+      if (isPausedRef.current || !heroVisibleRef.current) {
         animationRef.current = requestAnimationFrame(animate);
         return;
       }
@@ -116,54 +142,55 @@ function Hero() {
       ref={heroRef}
       className="
         relative
-        min-h-screen
+        min-h-[100svh]
+pt-24 sm:pt-28
+pb-24 sm:pb-28
+
         flex
         items-center
         justify-center
         px-4
-        pt-28
-        sm:pt-32
-        pb-20
         overflow-hidden
       "
     >
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/20 via-white/40 to-slate-50/60 pointer-events-none" />
+
+      <div className="absolute top-20 left-10 w-72 h-72 bg-yellow-200/30 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-pulse delay-1000" />
       <canvas
         ref={canvasRef}
         className="absolute inset-0 z-0"
         style={{ opacity: bgOpacity }}
       />
 
-      <div className="absolute inset-0 pointer-events-none">
+      {/* <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-yellow-400/10 blur-3xl rounded-full" />
         <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-slate-900/5 blur-2xl rounded-full" />
-      </div>
+      </div> */}
 
       <div className="relative z-10 max-w-5xl mx-auto text-center">
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-8">
           <span className="inline-flex items-baseline gap-3">
             <span>We</span>
-            <span className="relative inline-flex items-baseline">
+            <span
+              className="relative inline-flex items-baseline"
+              aria-hidden="true"
+            >
               <span
                 className={`
-                  inline-block
                   text-yellow-500
                   transition-all
                   duration-300
                   ease-out
+                  inline-block min-w-[120px] sm:min-w-[255px]
                   ${
                     isAnimating
                       ? "opacity-0 -translate-y-4 scale-95"
                       : "opacity-100 translate-y-0 scale-100"
                   }
                 `}
-                style={{
-                  minWidth:
-                    typeof window !== "undefined" && window.innerWidth < 640
-                      ? "120px"
-                      : "255px",
-                }}
               >
-                {words[currentWordIndex]}
+                {mounted ? words[currentWordIndex] : words[0]}
               </span>
             </span>
           </span>
@@ -193,9 +220,96 @@ function Hero() {
             View Our Process
           </button>
         </div>
+        <div className="mt-12 sm:mt-20 transition-all duration-700 ease-out opacity-100 translate-y-0">
+          <div className="grid grid-cols-3 sm:flex sm:flex-row items-start justify-center gap-4 sm:gap-12 text-slate-600">
+            {/* Item 1 */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-3 cursor-default">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-yellow-100 flex items-center justify-center transition-transform sm:group-hover:scale-110">
+                <svg
+                  className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+
+              <div>
+                <p className="text-[11px] sm:text-sm font-semibold text-slate-900 leading-tight">
+                  End-to-End Execution
+                </p>
+                <p className="text-[9px] sm:text-xs text-slate-500">
+                  From idea to launch
+                </p>
+              </div>
+            </div>
+
+            {/* Item 2 */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-3 cursor-default">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-yellow-100 flex items-center justify-center transition-transform sm:group-hover:scale-110">
+                <svg
+                  className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+
+              <div>
+                <p className="text-[11px] sm:text-sm font-semibold text-slate-900 leading-tight">
+                  Fast Delivery
+                </p>
+                <p className="text-[9px] sm:text-xs text-slate-500">
+                  Rapid launch
+                </p>
+              </div>
+            </div>
+
+            {/* Item 3 */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-3 cursor-default">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-yellow-100 flex items-center justify-center transition-transform sm:group-hover:scale-110">
+                <svg
+                  className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
+                </svg>
+              </div>
+
+              <div>
+                <p className="text-[11px] sm:text-sm font-semibold text-slate-900 leading-tight">
+                  Long-Term Partner
+                </p>
+                <p className="text-[9px] sm:text-xs text-slate-500">
+                  We grow with you
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
         <div className="flex flex-col items-center gap-2 text-slate-400">
           <span className="text-xs uppercase tracking-wider">Scroll</span>
           <svg

@@ -31,9 +31,26 @@ const ProfileCard = ({ title, situation, why, index, scrollYProgress }) => {
   const y = useTransform(scrollYProgress, [start, end], [60, 0]);
   const opacity = useTransform(scrollYProgress, [start, end], [0, 1]);
 
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+
+  // ENTRY DIRECTION LOGIC
+  let initialX = 0;
+
+  if (isMobile) {
+    // mobile: alternate left/right per card
+    initialX = index % 2 === 0 ? 80 : -80;
+  } else {
+    // desktop: left column from left, right column from right
+    initialX = index % 2 === 0 ? -120 : 120;
+  }
+
   return (
     <motion.div
-      style={{ y, opacity }}
+      initial={{ x: initialX, opacity: 0 }}
+      whileInView={{ x: 0, opacity: 1 }}
+      viewport={{ once: true, margin: "-80px" }} // ENTRY ONLY
+      transition={{ duration: 0.7, ease: "easeOut" }}
+      style={{ y, opacity }} // EXISTING SCROLL ANIMATION (UNCHANGED)
       className="
         rounded-2xl
         border border-slate-200
@@ -65,7 +82,7 @@ const WhoItsFor = () => {
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
-    offset: ["start 80%", "end 20%"],
+    offset: ["start 90%", "end 30%"],
   });
 
   const headerY = useTransform(scrollYProgress, [0, 0.3], [40, 0]);
@@ -75,7 +92,7 @@ const WhoItsFor = () => {
     <section
       ref={sectionRef}
       id="who-its-for"
-      className="relative bg-white py-28 sm:py-36 px-4"
+      className="relative bg-white pt-20 pb-28 sm:pt-24 sm:pb-36 px-4"
     >
       <div className="max-w-6xl mx-auto">
         <motion.div

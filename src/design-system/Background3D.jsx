@@ -1,12 +1,18 @@
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 
 function Background3D() {
-  const canvasRef = useRef(null);
-  const particlesRef = useRef([]);
-  // const mouseRef = useRef({ x: 0, y: 0 });
-  const mouseRef = useRef({ x: 0, y: 0, active: false });
+  const visibleRef = useRef(true);
 
-  const animationRef = useRef(null);
+  const canvasRef = useRef(null);
+  const layersRef = useRef([]);
+  const pointerRef = useRef({
+    x: 0,
+    y: 0,
+    active: false,
+    strength: 0,
+  });
+  const idleRef = useRef({ time: 0, burst: false });
+  const rafRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -14,219 +20,289 @@ function Background3D() {
 
     const ctx = canvas.getContext("2d");
 
-    // Set canvas size
-    const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+    /* ---------- REDUCED MOTION (ACCESSIBILITY + PERF) ---------- */
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (reduceMotion) return;
 
-    // Initialize particles
-    const particleCount = 350;
-    particlesRef.current = Array.from({ length: particleCount }, () => {
-      const sizeRand = Math.random();
-      let size;
-      if (sizeRand < 0.6) {
-        size = 3 + Math.random() * 2; // Small
-      } else if (sizeRand < 0.9) {
-        size = 5 + Math.random() * 3; // Medium
-      } else {
-        size = 8 + Math.random() * 6; // Large focal
-      }
+    const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
-      return {
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.12,
-        vy: (Math.random() - 0.5) * 0.12,
-        size,
-        color:
-          Math.random() < 0.7
-            ? { r: 253, g: 216, b: 53 } // Yellow #FDD835
-            : {
-                r: 60 + Math.random() * 80,
-                g: 60 + Math.random() * 80,
-                b: 60 + Math.random() * 80,
-              }, // Grey
-      };
-    });
+    let width = 0;
+    let height = 0;
+    let unit = 0;
+    let cx = 0;
+    let cy = 0;
 
-    // Mouse move handler
-    const handleMouseMove = (e) => {
-      mouseRef.current.x = e.clientX;
-      mouseRef.current.y = e.clientY;
-      mouseRef.current.active = true;
+    let observer;
+
+    /* ---------- RESIZE ---------- */
+    const resize = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      unit = Math.min(width, height);
+      cx = width / 2;
+      cy = height / 2;
+
+      canvas.width = width * DPR;
+      canvas.height = height * DPR;
+      canvas.style.width = width + "px";
+      canvas.style.height = height + "px";
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+
+      buildLayers();
     };
 
-    const handleMouseOut = (e) => {
-      if (
-        e.clientX <= 0 ||
-        e.clientY <= 0 ||
-        e.clientX >= window.innerWidth ||
-        e.clientY >= window.innerHeight
-      ) {
-        mouseRef.current.active = false;
-      }
+    /* ---------- BUILD ---------- */
+    const buildLayers = () => {
+      const isMobile = unit < 600;
+      const LAYERS = isMobile ? 2 : 3;
+      const BASE_NODES = isMobile ? 55 : 150;
+
+      layersRef.current = Array.from({ length: LAYERS }, (_, i) => {
+        const depth = (i + 1) / LAYERS;
+        const count = Math.floor(BASE_NODES / depth);
+
+        return {
+          depth,
+          nodes: Array.from({ length: count }, () => {
+            const x = Math.random() * width;
+            const y = Math.random() * height;
+            return {
+              x,
+              y,
+              hx: x,
+              hy: y,
+              vx: (Math.random() - 0.5) * unit * 0.00018 * depth,
+              vy: (Math.random() - 0.5) * unit * 0.00018 * depth,
+              ox: 0,
+              oy: 0,
+              disconnect: 0,
+              r: unit * 0.003 * depth,
+            };
+          }),
+        };
+      });
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseout", handleMouseOut);
+    resize();
+    window.addEventListener("resize", resize);
 
-    const resetParticle = (particle) => {
-      particle.x = Math.random() * canvas.width;
-      particle.y = Math.random() * canvas.height;
-      particle.vx = (Math.random() - 0.5) * 0.12;
-      particle.vy = (Math.random() - 0.5) * 0.12;
+    /* ---------- VISIBILITY OBSERVER ---------- */
+    observer = new IntersectionObserver(
+      ([entry]) => {
+        visibleRef.current = entry.isIntersecting;
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(canvas);
+
+    /* ---------- INPUT ---------- */
+    const activate = (x, y) => {
+      pointerRef.current.x = x;
+      pointerRef.current.y = y;
+      pointerRef.current.active = true;
+    };
+    const deactivate = () => {
+      pointerRef.current.active = false;
     };
 
-    // Animation loop
+    window.addEventListener("mousemove", (e) => activate(e.clientX, e.clientY));
+    window.addEventListener("mouseout", deactivate);
+    window.addEventListener("touchstart", (e) =>
+      activate(e.touches[0].clientX, e.touches[0].clientY)
+    );
+    window.addEventListener("touchmove", (e) =>
+      activate(e.touches[0].clientX, e.touches[0].clientY)
+    );
+    window.addEventListener("touchend", deactivate);
+
+    /* ---------- ANIMATION ---------- */
+    let lastTime = 0;
+
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!visibleRef.current) {
+        rafRef.current = requestAnimationFrame(animate);
+        return;
+      }
 
-      particlesRef.current.forEach((particle) => {
-        // Update position with drift
-        particle.x += particle.vx;
-        particle.y += particle.vy;
+      const now = performance.now();
+      if (now - lastTime < 33) {
+        rafRef.current = requestAnimationFrame(animate);
+        return;
+      }
+      lastTime = now;
 
-        // Subtle mouse influence (1-2% shift)
-        // const dx = mouseRef.current.x - particle.x;
-        // const dy = mouseRef.current.y - particle.y;
-        // particle.x += dx * 0.001;
-        // particle.y += dy * 0.001;
-        // if (mouseRef.current.active) {
-        //   const dx = mouseRef.current.x - particle.x;
-        //   const dy = mouseRef.current.y - particle.y;
-        //   const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+      ctx.clearRect(0, 0, width, height);
 
-        //   const maxRange = 350; // px
-        //   if (distance < maxRange) {
-        //     const force = (1 - distance / maxRange) * 0.8;
-        //     particle.x += (dx / distance) * force;
-        //     particle.y += (dy / distance) * force;
-        //   }
-        // } else {
-        //   // Scatter outward when mouse is not present
-        //   const cx = canvas.width / 2;
-        //   const cy = canvas.height / 2;
-        //   const dx = particle.x - cx;
-        //   const dy = particle.y - cy;
-        //   const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+      const LINK_DIST = unit * 0.22;
+      const INTERACT_RADIUS = unit * 0.25;
 
-        //   const scatterForce = 0.18;
-        //   particle.x += (dx / distance) * scatterForce;
-        //   particle.y += (dy / distance) * scatterForce;
-        // }
+      const HOME_GRAVITY = 0.00035;
 
-        const cx = canvas.width / 2;
-        const cy = canvas.height / 2;
+      const BALANCE_FORCE = 0.00035;
+      const CENTER_DAMPING = 0.00015;
 
-        if (mouseRef.current.active) {
-          const dx = mouseRef.current.x - particle.x;
-          const dy = mouseRef.current.y - particle.y;
-          const distance = Math.sqrt(dx * dx + dy * dy) || 1;
+      pointerRef.current.strength +=
+        ((pointerRef.current.active ? 1 : 0) - pointerRef.current.strength) *
+        0.08;
 
-          const maxRange = 350;
+      if (!pointerRef.current.active) idleRef.current.time++;
+      else idleRef.current.time = 0;
 
-          if (distance < maxRange) {
-            // 🔹 Attraction zone
-            const force = (1 - distance / maxRange) * 0.8;
-            particle.x += (dx / distance) * force;
-            particle.y += (dy / distance) * force;
-          } else {
-            // 🔹 Still scatter if too far
-            const sdx = particle.x - cx;
-            const sdy = particle.y - cy;
-            const sdist = Math.sqrt(sdx * sdx + sdy * sdy) || 1;
+      const isIdleLong = idleRef.current.time > 1200;
 
-            const scatterForce = 0.18;
-            particle.x += (sdx / sdist) * scatterForce;
-            particle.y += (sdy / sdist) * scatterForce;
+      layersRef.current.forEach(({ nodes, depth }) => {
+        nodes.forEach((n) => {
+          n.x += n.vx;
+          n.y += n.vy;
+
+          n.ox += (n.hx - n.x) * HOME_GRAVITY * depth;
+          n.oy += (n.hy - n.y) * HOME_GRAVITY * depth;
+
+          const normX = (n.x - cx) / (width * 0.5);
+          n.ox -= normX * BALANCE_FORCE * unit * depth;
+
+          if (!pointerRef.current.active) {
+            const dx = n.x - cx;
+            const dy = n.y - cy;
+            const dist = Math.hypot(dx, dy) || 1;
+            if (dist < unit * 0.45) {
+              const repel = (1 - dist / (unit * 0.45)) * CENTER_DAMPING * unit;
+              n.ox += (dx / dist) * repel;
+              n.oy += (dy / dist) * repel;
+            }
           }
-        } else {
-          // 🔹 Normal scatter when mouse is absent
-          const dx = particle.x - cx;
-          const dy = particle.y - cy;
-          const distance = Math.sqrt(dx * dx + dy * dy) || 1;
 
-          const scatterForce = 0.18;
-          particle.x += (dx / distance) * scatterForce;
-          particle.y += (dy / distance) * scatterForce;
+          if (
+            isIdleLong &&
+            pointerRef.current.active &&
+            !idleRef.current.burst
+          ) {
+            const dx = n.x - cx;
+            const dy = n.y - cy;
+            const dist = Math.hypot(dx, dy) || 1;
+            const burst = depth * unit * 0.0022;
+            n.ox += (dx / dist) * burst;
+            n.oy += (dy / dist) * burst;
+            idleRef.current.burst = true;
+          }
+
+          let target = 0;
+          if (pointerRef.current.active) {
+            const d = Math.hypot(
+              n.x - pointerRef.current.x,
+              n.y - pointerRef.current.y
+            );
+            if (d < INTERACT_RADIUS) target = 1;
+          }
+          n.disconnect += (target - n.disconnect) * 0.15;
+
+          if (n.disconnect > 0.01 && pointerRef.current.active) {
+            const dx = n.x - pointerRef.current.x;
+            const dy = n.y - pointerRef.current.y;
+            const d = Math.hypot(dx, dy) || 1;
+            const swirl = n.disconnect * depth * 1.2;
+            n.ox += (-dy / d) * swirl;
+            n.oy += (dx / d) * swirl;
+          }
+
+          n.x += n.ox * 0.08;
+          n.y += n.oy * 0.08;
+          n.ox *= 0.9;
+          n.oy *= 0.9;
+
+          if (n.x < 0) n.x += width;
+          if (n.x > width) n.x -= width;
+          if (n.y < 0) n.y += height;
+          if (n.y > height) n.y -= height;
+        });
+
+        for (let i = 0; i < nodes.length; i++) {
+          for (let j = i + 1; j < nodes.length; j++) {
+            const a = nodes[i];
+            const b = nodes[j];
+            const d = Math.hypot(a.x - b.x, a.y - b.y);
+            if (d > LINK_DIST) continue;
+
+            const alpha =
+              Math.pow(1 - d / LINK_DIST, 1.4) *
+              (1 - Math.max(a.disconnect, b.disconnect)) *
+              0.45 *
+              depth;
+
+            ctx.strokeStyle = `rgba(235,195,95,${alpha})`;
+            ctx.lineWidth = depth;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
         }
 
-        const buffer = 80;
-
-        if (
-          particle.x < -buffer ||
-          particle.x > canvas.width + buffer ||
-          particle.y < -buffer ||
-          particle.y > canvas.height + buffer
-        ) {
-          resetParticle(particle);
-        }
-
-        // Draw particle with radial gradient
-        const gradient = ctx.createRadialGradient(
-          particle.x,
-          particle.y,
-          0,
-          particle.x,
-          particle.y,
-          particle.size
-        );
-
-        const alpha = 0.45;
-        gradient.addColorStop(
-          0,
-          `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, ${alpha})`
-        );
-        gradient.addColorStop(
-          0.5,
-          `rgba(${particle.color.r}, ${particle.color.g}, ${
-            particle.color.b
-          }, ${alpha * 0.5})`
-        );
-        gradient.addColorStop(
-          1,
-          `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, 0)`
-        );
-
-        ctx.fillStyle = gradient;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
+        nodes.forEach((n) => {
+          ctx.fillStyle = `rgba(130,130,130,${1 - n.disconnect * 0.6})`;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
       });
 
-      animationRef.current = requestAnimationFrame(animate);
+      if (!pointerRef.current.active) idleRef.current.burst = false;
+
+      if (pointerRef.current.strength > 0.01) {
+        const glowRadius = unit * 0.12 * pointerRef.current.strength;
+        const g = ctx.createRadialGradient(
+          pointerRef.current.x,
+          pointerRef.current.y,
+          0,
+          pointerRef.current.x,
+          pointerRef.current.y,
+          glowRadius
+        );
+        g.addColorStop(0, "rgba(255,200,80,0.28)");
+        g.addColorStop(0.45, "rgba(255,200,80,0.14)");
+        g.addColorStop(1, "rgba(255,200,80,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(
+          pointerRef.current.x,
+          pointerRef.current.y,
+          glowRadius,
+          0,
+          Math.PI * 2
+        );
+        ctx.fill();
+      }
+
+      rafRef.current = requestAnimationFrame(animate);
     };
 
     animate();
 
-    // Cleanup
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
-      }
-      window.removeEventListener("resize", resizeCanvas);
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseout", handleMouseOut);
+      cancelAnimationFrame(rafRef.current);
+      observer && observer.disconnect();
+      window.removeEventListener("resize", resize);
     };
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        zIndex: 0,
-        // background: "#fafafa",
-        pointerEvents: "none",
-      }}
-    />
+    <>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-yellow-400/10 blur-3xl rounded-full" />
+        <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-slate-900/5 blur-2xl rounded-full" />
+      </div>
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: -1,
+        }}
+      />
+    </>
   );
 }
 

@@ -42,6 +42,9 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const menuRef = useRef(null);
   const firstItemRef = useRef(null);
+  const [isHidden, setIsHidden] = useState(false);
+  const lastScrollY = useRef(0);
+
   const location = useLocation();
 
   const navItems = useMemo(
@@ -57,16 +60,31 @@ const Navbar = () => {
 
   useEffect(() => {
     let ticking = false;
+
     const onScroll = () => {
+      const currentY = window.scrollY;
+
       if (!ticking) {
         window.requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 10);
+          setIsScrolled(currentY > 10);
+
+          if (currentY > lastScrollY.current && currentY > 120) {
+            // scrolling down
+            setIsHidden(true);
+          } else {
+            // scrolling up
+            setIsHidden(false);
+          }
+
+          lastScrollY.current = currentY;
           ticking = false;
         });
+
         ticking = true;
       }
     };
-    window.addEventListener("scroll", onScroll);
+
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -145,7 +163,14 @@ const Navbar = () => {
   }, [navItems]);
 
   return (
-    <header className="fixed top-0 left-0 z-50 w-full">
+    <header
+      className={`
+    fixed top-0 left-0 z-50 w-full
+    transition-transform duration-1500 ease-in-out
+
+    ${isHidden ? "-translate-y-full" : "translate-y-0"}
+  `}
+    >
       <div className="mx-auto mt-4 sm:mt-8 max-w-7xl px-2">
         <nav
           role="navigation"

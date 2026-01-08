@@ -59,7 +59,11 @@ const WhatWeDoSection = () => {
 
     if (visual === "lightbulb") {
       return (
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div
+          className="relative w-full h-full flex items-center justify-center"
+          role="img"
+          aria-label="Lightbulb representing understanding"
+        >
           {[...Array(isMobile ? 6 : 10)].map((_, i) => {
             const rayRotate = useTransform(
               scrollYProgress,
@@ -84,7 +88,11 @@ const WhatWeDoSection = () => {
 
     if (visual === "palette") {
       return (
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div
+          className="relative w-full h-full flex items-center justify-center"
+          role="img"
+          aria-label="Color palette representing branding"
+        >
           {[
             "from-yellow-400 to-yellow-500",
             "from-slate-800 to-slate-900",
@@ -117,6 +125,8 @@ const WhatWeDoSection = () => {
         <motion.div
           style={{ scale: elementScale }}
           className="w-72 sm:w-80 h-56 sm:h-64 bg-slate-900 rounded-2xl shadow-2xl overflow-hidden"
+          role="img"
+          aria-label="Browser window representing website development"
         >
           <div className="h-10 bg-slate-800 flex gap-2 px-4 items-center">
             <div className="w-3 h-3 rounded-full bg-red-400" />
@@ -145,7 +155,11 @@ const WhatWeDoSection = () => {
 
     if (visual === "network") {
       return (
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div
+          className="relative w-full h-full flex items-center justify-center"
+          role="img"
+          aria-label="Network diagram representing online presence"
+        >
           <motion.div style={{ scale: elementScale }}>
             <div className="w-24 sm:w-32 h-24 sm:h-32 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 shadow-2xl" />
           </motion.div>
@@ -172,7 +186,11 @@ const WhatWeDoSection = () => {
 
     if (visual === "rocket") {
       return (
-        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+        <div
+          className="relative w-full h-full flex items-center justify-center overflow-hidden"
+          role="img"
+          aria-label="Rocket representing launch and growth"
+        >
           {[...Array(isMobile ? 25 : 50)].map((_, i) => {
             const starY = useTransform(
               scrollYProgress,
@@ -223,29 +241,39 @@ const WhatWeDoSection = () => {
   };
 
   return (
-    <section id="how-it-works" ref={containerRef} className="relative w-full">
-      <div className="max-w-4xl mx-auto px-6 pt-24 pb-12 text-center">
-        <h2 className="text-4xl sm:text-5xl font-black text-slate-900">
+    <section
+      id="how-it-works"
+      ref={containerRef}
+      className="relative w-full"
+      aria-labelledby="how-it-works-heading"
+    >
+      {/* FIXED: Reduced padding from pt-24 to pt-16 and pb-12 to pb-6 */}
+      <div className="max-w-4xl mx-auto px-6 pt-16 pb-6 text-center">
+        <h2
+          id="how-it-works-heading"
+          className="text-4xl sm:text-5xl font-black text-slate-900"
+        >
           How We Build and Launch Startups
         </h2>
         <p className="mt-4 text-lg sm:text-xl text-slate-600">
-          A clear, structured process from idea to launch .
+          A clear, structured process from idea to launch.
         </p>
       </div>
 
       <div
         className="relative"
-        style={{ height: `${WHAT_WE_DO_STEPS.length * 100}vh` }}
+        style={{ height: `${WHAT_WE_DO_STEPS.length * 60}vh` }}
       >
-        <div className="sticky top-0 h-screen w-full overflow-hidden flex items-center">
+        <div className="sticky top-0 h-[100vh] w-full overflow-hidden flex items-center">
           {WHAT_WE_DO_STEPS.map((step, index) => {
             const start = index / WHAT_WE_DO_STEPS.length;
             const end = (index + 1) / WHAT_WE_DO_STEPS.length;
             const opacity = useTransform(
               scrollYProgress,
-              [start, start + 0.15, end - 0.15, end],
+              [start, start + 0.08, end - 0.08, end],
               [0, 1, 1, 0]
             );
+
             const isReverse = index % 2 !== 0;
 
             return (
