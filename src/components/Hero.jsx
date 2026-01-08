@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 function Hero() {
   const words = ["Build", "Design", "Launch", "Scale", "Grow"];
@@ -8,6 +9,7 @@ function Hero() {
 
   const heroRef = useRef(null);
   const heroVisibleRef = useRef(true);
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -136,6 +138,95 @@ function Hero() {
       document.removeEventListener("visibilitychange", onVisibilityChange);
   }, []);
 
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.7,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+  };
+
+  const badgeVariants = {
+    hidden: { opacity: 0, scale: 0.8, y: -20 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.34, 1.56, 0.64, 1],
+      },
+    },
+  };
+
+  const featureVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: 0.8 + i * 0.1,
+        duration: 0.5,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    }),
+  };
+
+  const features = [
+    {
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      ),
+      title: "End-to-End Execution",
+      subtitle: "From idea to launch",
+    },
+    {
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M13 10V3L4 14h7v7l9-11h-7z"
+        />
+      ),
+      title: "Fast Delivery",
+      subtitle: "Rapid launch",
+    },
+    {
+      icon: (
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+        />
+      ),
+      title: "Long-Term Partner",
+      subtitle: "We grow with you",
+    },
+  ];
+
   return (
     <section
       id="home"
@@ -143,9 +234,8 @@ function Hero() {
       className="
         relative
         min-h-[100svh]
-pt-24 sm:pt-28
-pb-24 sm:pb-28
-
+        pt-24 sm:pt-28
+        pb-24 sm:pb-28
         flex
         items-center
         justify-center
@@ -153,180 +243,229 @@ pb-24 sm:pb-28
         overflow-hidden
       "
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/20 via-white/40 to-slate-50/60 pointer-events-none" />
+      {/* Enhanced Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-yellow-50/30 via-white/50 to-slate-50/70 pointer-events-none" />
 
-      <div className="absolute top-20 left-10 w-72 h-72 bg-yellow-200/30 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-20 right-10 w-96 h-96 bg-yellow-300/20 rounded-full blur-3xl animate-pulse delay-1000" />
+      {/* Premium Ambient Glow Effects */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, ease: "easeOut" }}
+        className="absolute top-10 left-1/4 w-96 h-96 bg-yellow-200/25 rounded-full blur-3xl pointer-events-none"
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.5, delay: 0.3, ease: "easeOut" }}
+        className="absolute bottom-10 right-1/4 w-[500px] h-[500px] bg-yellow-300/15 rounded-full blur-3xl pointer-events-none animate-float-slow"
+      />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2, delay: 0.5 }}
+        className="absolute top-1/3 right-10 w-64 h-64 bg-slate-200/30 rounded-full blur-3xl pointer-events-none"
+      />
+
       <canvas
         ref={canvasRef}
         className="absolute inset-0 z-0"
         style={{ opacity: bgOpacity }}
       />
 
-      {/* <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-yellow-400/10 blur-3xl rounded-full" />
-        <div className="absolute bottom-10 right-10 w-[300px] h-[300px] bg-slate-900/5 blur-2xl rounded-full" />
-      </div> */}
-
-      <div className="relative z-10 max-w-5xl mx-auto text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-8">
+      <motion.div
+        className="relative z-10 max-w-5xl mx-auto text-center"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={badgeVariants} className="mb-8"></motion.div>
+        {/* Main Heading with Enhanced Word Animation */}
+        <motion.h1
+          variants={itemVariants}
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-8 heading-display"
+        >
           <span className="inline-flex items-baseline gap-3">
             <span>We</span>
             <span
               className="relative inline-flex items-baseline"
               aria-hidden="true"
             >
-              <span
-                className={`
-                  text-yellow-500
-                  transition-all
-                  duration-300
-                  ease-out
-                  inline-block min-w-[120px] sm:min-w-[255px]
-                  ${
-                    isAnimating
-                      ? "opacity-0 -translate-y-4 scale-95"
-                      : "opacity-100 translate-y-0 scale-100"
-                  }
-                `}
-              >
-                {mounted ? words[currentWordIndex] : words[0]}
-              </span>
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={currentWordIndex}
+                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+                  className="
+                    text-transparent bg-clip-text 
+                    bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500
+                    inline-block min-w-[120px] sm:min-w-[255px]
+                    drop-shadow-sm
+                  "
+                >
+                  {mounted ? words[currentWordIndex] : words[0]}
+                </motion.span>
+              </AnimatePresence>
             </span>
           </span>
 
           <span className="block mt-3">
             Startups with{" "}
             <span className="relative inline-block">
-              360° Support
-              <span className="absolute bottom-2 left-0 right-0 h-4 bg-yellow-400/30 -z-10 rounded-sm"></span>
+              <span className="relative z-10">360° Support</span>
+              <motion.span
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.8, delay: 1, ease: [0.4, 0, 0.2, 1] }}
+                className="absolute bottom-2 left-0 right-0 h-4 bg-gradient-to-r from-yellow-300/40 to-yellow-400/30 -z-10 rounded-sm origin-left"
+              />
             </span>
           </span>
-        </h1>
-
-        <p className="text-base sm:text-lg md:text-xl text-slate-600 leading-relaxed mb-14 max-w-3xl mx-auto">
+        </motion.h1>
+        {/* Subtitle with refined typography */}
+        <motion.p
+          variants={itemVariants}
+          className="text-base sm:text-lg md:text-xl text-slate-600 leading-relaxed mb-14 max-w-3xl mx-auto text-body"
+        >
           From brand identity to website development and launch, we help
           founders turn ideas into complete, professional, and scalable
           startups.
-        </p>
+        </motion.p>
+        {/* Enhanced CTA Buttons */}
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+        >
+          <motion.button
+            whileHover={{ scale: 1.03, y: -2 }}
+            whileTap={{ scale: 0.98 }}
+            className="
+              group relative overflow-hidden 
+              rounded-full bg-slate-900 
+              px-8 py-4 text-lg font-semibold text-white 
+              shadow-premium-xl
+              transition-all duration-300
+              glow-button
+            "
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              Start Your Startup
+              <svg
+                className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
+            </span>
+            <span className="absolute inset-0 bg-gradient-to-r from-yellow-400/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          </motion.button>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="group relative overflow-hidden rounded-full bg-slate-900 px-8 py-4 text-lg font-semibold text-white shadow-xl transition-all hover:shadow-2xl hover:scale-105 active:scale-100">
-            <span className="relative z-10">Start Your Startup</span>
-            <span className="absolute inset-0 bg-gradient-to-r from-yellow-400/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-
-          <button className="rounded-full border-2 border-slate-300 bg-transparent px-8 py-4 text-lg font-semibold text-slate-700 transition-all hover:border-slate-900 hover:bg-slate-50 active:scale-95">
+          <motion.button
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
+            className="
+              rounded-full 
+              border-2 border-slate-200 
+              bg-white/80 backdrop-blur-sm
+              px-8 py-4 text-lg font-semibold text-slate-700 
+              transition-all duration-300
+              hover:border-slate-300 hover:bg-white/50
+              hover:shadow-premium-lg
+            "
+          >
             View Our Process
-          </button>
-        </div>
-        <div className="mt-12 sm:mt-20 transition-all duration-700 ease-out opacity-100 translate-y-0">
+          </motion.button>
+        </motion.div>
+        {/* Enhanced Feature Pills */}
+        <div className="mt-12 sm:mt-20">
           <div className="grid grid-cols-3 sm:flex sm:flex-row items-start justify-center gap-4 sm:gap-12 text-slate-600">
-            {/* Item 1 */}
-            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-3 cursor-default">
-              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-yellow-100 flex items-center justify-center transition-transform sm:group-hover:scale-110">
-                <svg
-                  className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+            {features.map((feature, i) => (
+              <motion.div
+                key={i}
+                custom={i}
+                variants={featureVariants}
+                initial="hidden"
+                animate="visible"
+                whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                className="
+                  flex flex-col sm:flex-row items-center sm:items-start 
+                  text-center sm:text-left gap-1.5 sm:gap-3 
+                  cursor-default
+                  p-3 rounded-2xl
+                  transition-all duration-300
+                  hover:bg-white/60 hover:shadow-premium-md
+                "
+              >
+                <div
+                  className="
+                  w-10 h-10 sm:w-12 sm:h-12 
+                  rounded-full bg-gradient-to-br from-yellow-100 to-yellow-50
+                  flex items-center justify-center 
+                  shadow-sm
+                  transition-transform duration-300
+                  group-hover:scale-110
+                "
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
+                  <svg
+                    className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    {feature.icon}
+                  </svg>
+                </div>
 
-              <div>
-                <p className="text-[11px] sm:text-sm font-semibold text-slate-900 leading-tight">
-                  End-to-End Execution
-                </p>
-                <p className="text-[9px] sm:text-xs text-slate-500">
-                  From idea to launch
-                </p>
-              </div>
-            </div>
-
-            {/* Item 2 */}
-            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-3 cursor-default">
-              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-yellow-100 flex items-center justify-center transition-transform sm:group-hover:scale-110">
-                <svg
-                  className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M13 10V3L4 14h7v7l9-11h-7z"
-                  />
-                </svg>
-              </div>
-
-              <div>
-                <p className="text-[11px] sm:text-sm font-semibold text-slate-900 leading-tight">
-                  Fast Delivery
-                </p>
-                <p className="text-[9px] sm:text-xs text-slate-500">
-                  Rapid launch
-                </p>
-              </div>
-            </div>
-
-            {/* Item 3 */}
-            <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-1.5 sm:gap-3 cursor-default">
-              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-full bg-yellow-100 flex items-center justify-center transition-transform sm:group-hover:scale-110">
-                <svg
-                  className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                  />
-                </svg>
-              </div>
-
-              <div>
-                <p className="text-[11px] sm:text-sm font-semibold text-slate-900 leading-tight">
-                  Long-Term Partner
-                </p>
-                <p className="text-[9px] sm:text-xs text-slate-500">
-                  We grow with you
-                </p>
-              </div>
-            </div>
+                <div>
+                  <p className="text-[11px] sm:text-sm font-semibold text-slate-900 leading-tight">
+                    {feature.title}
+                  </p>
+                  <p className="text-[9px] sm:text-xs text-slate-500">
+                    {feature.subtitle}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
-        <div className="flex flex-col items-center gap-2 text-slate-400">
-          <span className="text-xs uppercase tracking-wider">Scroll</span>
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
+      {/* Enhanced Scroll Indicator */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.5, duration: 0.5 }}
+        className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2"
+      >
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="flex flex-col items-center gap-2 text-slate-400"
+        >
+          <span className="text-xs uppercase tracking-wider font-medium">
+            Scroll
+          </span>
+          <div className="w-6 h-10 rounded-full border-2 border-slate-300 flex items-start justify-center p-1">
+            <motion.div
+              animate={{ y: [0, 12, 0] }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="w-1.5 h-3 bg-slate-400 rounded-full"
             />
-          </svg>
-        </div>
-      </div>
+          </div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
