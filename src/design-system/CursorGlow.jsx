@@ -3,7 +3,13 @@ import { useEffect, useRef } from "react";
 function CursorGlow() {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
-  const pointer = useRef({ x: 0, y: 0, active: false });
+
+  const pointer = useRef({
+    x: 0,
+    y: 0,
+    active: false,
+    intensity: 0, // smooth fade
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -16,20 +22,42 @@ function CursorGlow() {
     resize();
     window.addEventListener("resize", resize);
 
-    const move = (e) => {
-      pointer.current.x = e.clientX;
-      pointer.current.y = e.clientY;
+    const activate = (x, y) => {
+      pointer.current.x = x;
+      pointer.current.y = y;
       pointer.current.active = true;
+      pointer.current.intensity = 1;
     };
-    const leave = () => (pointer.current.active = false);
+
+    const move = (e) => activate(e.clientX, e.clientY);
+
+    const touchMove = (e) => {
+      const t = e.touches[0];
+      if (t) activate(t.clientX, t.clientY);
+    };
+
+    const deactivate = () => {
+      pointer.current.active = false;
+    };
 
     window.addEventListener("mousemove", move);
-    window.addEventListener("mouseout", leave);
+    window.addEventListener("touchstart", touchMove, { passive: true });
+    window.addEventListener("touchmove", touchMove, { passive: true });
+    window.addEventListener("mouseout", deactivate);
+    window.addEventListener("touchend", deactivate);
+    window.addEventListener("touchcancel", deactivate);
 
     const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (pointer.current.active) {
+      // fade logic
+      if (!pointer.current.active) {
+        pointer.current.intensity *= 0.92;
+      }
+
+      if (pointer.current.intensity > 0.01) {
+        const alpha = 0.25 * pointer.current.intensity;
+
         const g = ctx.createRadialGradient(
           pointer.current.x,
           pointer.current.y,
@@ -38,7 +66,8 @@ function CursorGlow() {
           pointer.current.y,
           120
         );
-        g.addColorStop(0, "rgba(255,200,80,0.25)");
+
+        g.addColorStop(0, `rgba(255,200,80,${alpha})`);
         g.addColorStop(1, "rgba(255,200,80,0)");
 
         ctx.fillStyle = g;
@@ -56,7 +85,11 @@ function CursorGlow() {
       cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", move);
-      window.removeEventListener("mouseout", leave);
+      window.removeEventListener("touchstart", touchMove);
+      window.removeEventListener("touchmove", touchMove);
+      window.removeEventListener("mouseout", deactivate);
+      window.removeEventListener("touchend", deactivate);
+      window.removeEventListener("touchcancel", deactivate);
     };
   }, []);
 

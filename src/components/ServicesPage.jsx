@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Lightbulb, Store, Rocket } from "lucide-react";
+
 import CursorGlow from "../design-system/CursorGlow";
 
 /* =========================================
@@ -377,9 +379,10 @@ const IsometricContent = () => (
           <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full shadow-sm"></div>
           <div className="h-2 w-16 bg-slate-100 rounded"></div>
         </div>
-        <div className="aspect-square bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg flex items-center justify-center text-xl">
-          🚀
+        <div className="aspect-square bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg flex items-center justify-center">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 shadow-sm" />
         </div>
+
         <div className="flex gap-2">
           <div className="w-4 h-4 bg-slate-100 rounded hover:bg-slate-200 transition-colors"></div>
           <div className="w-4 h-4 bg-slate-100 rounded hover:bg-slate-200 transition-colors"></div>
@@ -442,29 +445,42 @@ const CombinedServicesSummary = () => {
     {
       title: "Idea Stage",
       desc: "Branding → Website → Launch",
-      icon: "💡",
-      gradient: "from-blue-50 to-blue-100/50",
+      detail:
+        "We take your raw idea and transform it into a credible, launch-ready startup foundation.",
+      icon: Lightbulb,
+      gradient: "from-blue-50 to-blue-100/60",
       border: "border-blue-200/50",
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
     },
     {
       title: "Going Online",
-      desc: "Refresh → Web → Setup",
-      icon: "🌐",
-      gradient: "from-purple-50 to-purple-100/50",
+      desc: "Refresh → Website → Setup",
+      detail:
+        "We modernize your business identity and bring it online with professional clarity.",
+      icon: Store,
+      gradient: "from-purple-50 to-purple-100/60",
       border: "border-purple-200/50",
+      iconBg: "bg-purple-100",
+      iconColor: "text-purple-600",
     },
     {
       title: "Scale Up",
       desc: "UI/UX → Content → Growth",
-      icon: "📈",
-      gradient: "from-emerald-50 to-emerald-100/50",
-      border: "border-emerald-200/50",
+      detail:
+        "We refine your product presence and prepare your brand for serious growth.",
+      icon: Rocket,
+      gradient: "from-amber-50 to-amber-100/60",
+      border: "border-amber-200/50",
+      iconBg: "bg-amber-100",
+      iconColor: "text-amber-600",
     },
   ];
 
   return (
-    <section className="py-24 px-6 bg-gradient-to-b from-slate-50 to-white border-y border-slate-100">
-      <div className="max-w-5xl mx-auto text-center">
+    <section className="py-28 px-6 bg-gradient-to-b from-slate-50 via-white to-white border-y border-slate-100">
+      <div className="max-w-6xl mx-auto text-center">
+        {/* Header */}
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -473,45 +489,76 @@ const CombinedServicesSummary = () => {
         >
           Combined for{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 to-amber-500">
-            Impact
+            Real Impact
           </span>
         </motion.h2>
+
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
-          className="text-slate-600 mb-12 max-w-2xl mx-auto text-body"
+          className="text-slate-600 mb-16 max-w-2xl mx-auto text-body leading-relaxed"
         >
-          We don't sell these as isolated services. We mix and match them to
-          build exactly what you need.
+          Our services are not sold separately. They are combined strategically
+          based on your stage to produce real business outcomes — not just good
+          looking deliverables.
         </motion.p>
 
-        <div className="grid sm:grid-cols-3 gap-6">
-          {scenarios.map((s, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              whileHover={{ y: -5, scale: 1.02 }}
-              className={`
-                p-8 rounded-3xl 
-                bg-gradient-to-br ${s.gradient}
-                border ${s.border}
-                shadow-premium-md
-                hover:shadow-premium-xl
-                transition-all duration-300
-              `}
-            >
-              <div className="text-3xl mb-4">{s.icon}</div>
-              <h3 className="font-bold text-slate-900 mb-2 text-lg">
-                {s.title}
-              </h3>
-              <p className="text-sm text-slate-600 font-mono">{s.desc}</p>
-            </motion.div>
-          ))}
+        {/* Cards */}
+        <div className="grid sm:grid-cols-3 gap-8">
+          {scenarios.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.12 }}
+                whileHover={{ y: -6, scale: 1.02 }}
+                className={`
+                  relative
+                  p-10 rounded-3xl 
+                  bg-gradient-to-br ${s.gradient}
+                  border ${s.border}
+                  shadow-premium-md
+                  hover:shadow-premium-xl
+                  transition-all duration-300
+                  text-left
+                  overflow-hidden
+                `}
+              >
+                {/* Soft glow */}
+                <div className="absolute -top-20 -right-20 w-48 h-48 bg-white/40 rounded-full blur-3xl pointer-events-none" />
+
+                {/* Icon */}
+                <div
+                  className={`w-12 h-12 rounded-xl ${s.iconBg} flex items-center justify-center mb-6 shadow-sm`}
+                >
+                  <Icon className={`w-6 h-6 ${s.iconColor}`} />
+                </div>
+
+                {/* Title */}
+                <h3 className="font-bold text-slate-900 mb-2 text-lg">
+                  {s.title}
+                </h3>
+
+                {/* Flow */}
+                <p className="text-sm font-semibold text-slate-700 mb-3 font-mono">
+                  {s.desc}
+                </p>
+
+                {/* Detail */}
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  {s.detail}
+                </p>
+
+                {/* Bottom accent */}
+                <div className="mt-6 h-[2px] w-12 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full" />
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
