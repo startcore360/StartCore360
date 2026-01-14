@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, Suspense } from "react";
 import { motion } from "framer-motion";
 import { Lightbulb, Store, Rocket } from "lucide-react";
 
-import CursorGlow from "../design-system/CursorGlow";
-
+// import CursorGlow from "../design-system/CursorGlow";
+const CursorGlow = React.lazy(() => import("../design-system/CursorGlow"));
 /* =========================================
    MAIN PAGE COMPONENT
    ========================================= */
@@ -14,7 +14,9 @@ const ServicesPage = () => {
       className="bg-gradient-to-b from-white via-slate-50/30 to-white min-h-screen font-sans selection:bg-yellow-200"
     >
       <PageHero />
-      <CursorGlow />
+      <Suspense fallback={null}>
+        <CursorGlow />
+      </Suspense>
 
       {/* 1. Branding - Floating 3D Cards */}
       <ServiceGroup

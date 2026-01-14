@@ -2,8 +2,9 @@ import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 
 import Navbar from "./design-system/Navbar";
-import Background3D from "./design-system/Background3D";
-import CursorGlow from "./design-system/CursorGlow"; // ✅ ADD THIS
+const Background3D = React.lazy(() => import("./design-system/Background3D"));
+// const CursorGlow = React.lazy(() => import("./design-system/CursorGlow"));
+
 import Hero from "./components/Hero";
 
 const WhatWeDoSection = lazy(() => import("./components/WhatWeDo"));
@@ -26,7 +27,9 @@ function App() {
           pointerEvents: "none",
         }}
       >
-        <Background3D />
+        <Suspense fallback={null}>
+          <Background3D />
+        </Suspense>
       </div>
 
       {/* APP CONTENT */}
