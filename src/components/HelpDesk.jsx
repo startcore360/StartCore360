@@ -235,6 +235,8 @@ const HelpDesk = () => {
   const [sending, setSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const bottomRef = useRef();
+  const [hideOnScroll, setHideOnScroll] = useState(false);
+  const scrollTimeoutRef = useRef(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -251,6 +253,26 @@ const HelpDesk = () => {
     "What's your pricing?",
     "Can you help with branding?",
   ];
+  useEffect(() => {
+    const handleScroll = () => {
+      setHideOnScroll(true);
+
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        setHideOnScroll(false);
+      }, 2500);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, []);
 
   const sendMessage = () => {
     if (!input.trim() || isTyping) return;
@@ -430,18 +452,24 @@ ${conversationHistory}
     <>
       {/* Floating Button - Responsive */}
       <motion.button
+        animate={{
+          opacity: hideOnScroll ? 0 : 1,
+          scale: hideOnScroll ? 0.8 : 1,
+          y: hideOnScroll ? 20 : 0,
+        }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
         onClick={() => setOpen((o) => !o)} // toggle open/close
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50"
+        className="fixed bottom-8 right-7 sm:bottom-6 sm:right-6 z-50"
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 160 }}
+        // animate={{ scale: 1 }}
+        // transition={{ type: "spring", stiffness: 160 }}
       >
         <div className="relative">
           <div className="absolute inset-0 bg-yellow-400/70 blur-xl rounded-full" />
           <div className="relative bg-yellow-400/60 hover:bg-white/80 ext-black backdrop-blur-xl p-3 sm:p-4 rounded-full shadow-[0_10px_40px_rgba(0,0,0,0.12)]  hover:border-yellow-400 transition-all duration-300">
-            <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 text-slate-900" />
+            <MessageCircle className="w-6 h-6 sm:w-6 sm:h-6 text-slate-900" />
           </div>
         </div>
       </motion.button>
