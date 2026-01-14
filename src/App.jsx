@@ -6,6 +6,7 @@ const Background3D = React.lazy(() => import("./design-system/Background3D"));
 // const CursorGlow = React.lazy(() => import("./design-system/CursorGlow"));
 
 import Hero from "./components/Hero";
+import HelpDesk from "./components/HelpDesk";
 
 const WhatWeDoSection = lazy(() => import("./components/WhatWeDo"));
 const WhoItsFor = lazy(() => import("./components/WhoItsFor"));
@@ -44,6 +45,7 @@ function App() {
             <WhoItsFor />
             <ServicesPage />
             <StartYourStartupPage />
+            <HelpDesk />
           </Suspense>
         </main>
 

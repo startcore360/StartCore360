@@ -209,7 +209,7 @@ const Navbar = () => {
               height="40"
               loading="eager"
               decoding="async"
-              className="h-9 w-9 md:h-10 md:w-10 select-none"
+              // className="h-9 w-9 md:h-10 md:w-10 select-none"
             />
 
             <p className="text-sm md:text-base font-semibold text-slate-900">
