@@ -138,7 +138,7 @@ const Navbar = () => {
     const el = document.getElementById(id);
     if (!el) return;
 
-    const yOffset = -120;
+    const yOffset = -10;
     const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
     window.scrollTo({
@@ -236,6 +236,7 @@ const Navbar = () => {
             <motion.button
               whileHover={{ scale: 1.03, y: -1 }}
               whileTap={{ scale: 0.97 }}
+              onClick={() => scrollToSection("contact")}
               className="
                 group relative overflow-hidden 
                 rounded-full bg-slate-900 

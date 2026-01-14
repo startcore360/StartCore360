@@ -114,7 +114,7 @@ const WhoItsFor = () => {
     <section
       ref={sectionRef}
       id="who-its-for"
-      className="relative bg-gradient-to-b from-white via-slate-50/50 to-white pt-20 pb-28 sm:pt-24 sm:pb-36 px-4 overflow-hidden"
+      className="relative bg-gradient-to-b from-white via-slate-50/50 to-white pt-20 pb-15  sm:pb-36 px-4 overflow-hidden -mt-40"
     >
       {/* Background glows */}
       <div className="absolute top-20 left-0 w-72 h-72 bg-yellow-100/30 rounded-full blur-3xl pointer-events-none" />

@@ -42,6 +42,19 @@ function Hero() {
     return () => clearInterval(interval);
   }, []);
 
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const yOffset = -120;
+    const y = el.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+    window.scrollTo({
+      top: y,
+      behavior: "smooth",
+    });
+  };
+
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const particlesRef = useRef([]);
@@ -340,6 +353,7 @@ function Hero() {
           <motion.button
             whileHover={{ scale: 1.03, y: -2 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => scrollToSection("contact")}
             className="
               group relative overflow-hidden 
               rounded-full bg-slate-900 
@@ -371,6 +385,7 @@ function Hero() {
           <motion.button
             whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.98 }}
+            onClick={() => scrollToSection("how-it-works")}
             className="
               rounded-full 
               border-2 border-slate-200 

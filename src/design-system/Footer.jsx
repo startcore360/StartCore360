@@ -109,7 +109,7 @@ const Footer = () => {
             </h4>
             <ul className="space-y-3 text-sm">
               {[
-                { label: "Home", id: "hero" },
+                { label: "Home", id: "home" },
                 { label: "Services", id: "services" },
                 { label: "Start Your Startup", id: "contact" },
               ].map((item) => (

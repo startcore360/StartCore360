@@ -255,14 +255,14 @@ const WhatWeDoSection = () => {
         >
           How We Build and Launch Startups
         </h2>
-        <p className="mt-4 text-lg sm:text-xl text-slate-600">
+        <p className="mt-4 -mb-10 text-lg sm:text-xl text-slate-600">
           A clear, structured process from idea to launch.
         </p>
       </div>
 
       <div
         className="relative"
-        style={{ height: `${WHAT_WE_DO_STEPS.length * 60}vh` }}
+        style={{ height: `${WHAT_WE_DO_STEPS.length * 50}vh` }}
       >
         <div className="sticky top-0 h-[100vh] w-full overflow-hidden flex items-center">
           {WHAT_WE_DO_STEPS.map((step, index) => {
