@@ -129,9 +129,7 @@ const PageHero = () => {
           className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-900 mb-8 leading-tight heading-display"
         >
           Services Designed to <br className="hidden md:block" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600">
-            Build and Launch Properly
-          </span>
+          <span className="text-slate-900">Build and Launch Properly</span>
         </motion.h1>
 
         <motion.p

@@ -126,14 +126,14 @@ const Footer = () => {
                   </button>
                 </li>
               ))}
-              <li>
+              {/* <li>
                 <a
                   href="/blog"
                   className="hover:text-white transition-colors cursor-pointer block focus:outline-none focus:text-yellow-400 underline-animate"
                 >
                   Blog
                 </a>
-              </li>
+              </li> */}
             </ul>
           </motion.nav>
 
