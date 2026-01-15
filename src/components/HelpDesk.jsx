@@ -216,6 +216,10 @@ const findAnswer = (text) => {
 
 const HelpDesk = () => {
   const [open, setOpen] = useState(false);
+  const [askedQuestions, setAskedQuestions] = useState([]);
+  const [visibleQuickQuestions, setVisibleQuickQuestions] = useState([]);
+  const [showQuick, setShowQuick] = useState(true);
+
   const [messages, setMessages] = useState([
     {
       from: "bot",
@@ -247,12 +251,34 @@ const HelpDesk = () => {
   }, [messages, isTyping, leadMode]);
 
   // Quick questions
-  const quickQuestions = [
+  const QUICK_QUESTION_POOL = [
     "What services do you offer?",
     "How does your process work?",
     "What's your pricing?",
     "Can you help with branding?",
+    "Do you build ecommerce websites?",
+    "How long does a startup take to build?",
+    "Do you support after launch?",
+    "Can I start with just an idea?",
+    "Do you work with small businesses?",
+    "What makes you different?",
+    "Do you provide content support?",
+    "Can you redesign my existing website?",
+    "Do you handle social media?",
+    "Do you offer consultation?",
+    "How do I start with Start Core 360?",
   ];
+
+  const shuffleAndPick = (pool, count, exclude = []) => {
+    const filtered = pool.filter((q) => !exclude.includes(q));
+    const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+
+  useEffect(() => {
+    setVisibleQuickQuestions(shuffleAndPick(QUICK_QUESTION_POOL, 4));
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       setHideOnScroll(true);
@@ -276,6 +302,7 @@ const HelpDesk = () => {
 
   const sendMessage = () => {
     if (!input.trim() || isTyping) return;
+    setShowQuick(false);
 
     const userText = input.trim();
     const userMessage = {
@@ -347,6 +374,12 @@ const HelpDesk = () => {
       }
 
       setIsTyping(false);
+      setVisibleQuickQuestions(
+        shuffleAndPick(QUICK_QUESTION_POOL, 4, askedQuestions)
+      );
+      setTimeout(() => {
+        setShowQuick(true);
+      }, 400);
     }, 1500);
   };
 
@@ -442,10 +475,17 @@ ${conversationHistory}
   };
 
   const handleQuickQuestion = (question) => {
+    setAskedQuestions((prev) => [...prev, question]);
+
     setInput(question);
     setTimeout(() => {
       sendMessage();
     }, 100);
+
+    // Refresh suggestions
+    setVisibleQuickQuestions((prev) =>
+      shuffleAndPick(QUICK_QUESTION_POOL, 4, [...askedQuestions, question])
+    );
   };
 
   return (
@@ -603,7 +643,7 @@ ${conversationHistory}
                 )}
 
                 {/* Quick Questions */}
-                {!leadMode && messages.length <= 3 && (
+                {/* {!leadMode && visibleQuickQuestions.length > 0 && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -613,7 +653,31 @@ ${conversationHistory}
                       Quick questions:
                     </p>
                     <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                      {quickQuestions.map((q, i) => (
+                      {visibleQuickQuestions.map((q, i) => (
+                        <motion.button
+                          key={i}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => handleQuickQuestion(q)}
+                          className="px-2.5 py-1.5 text-xs bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 rounded-full hover:border-yellow-400 transition-colors"
+                        >
+                          {q}
+                        </motion.button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )} */}
+                {!leadMode && showQuick && visibleQuickQuestions.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-3 sm:mt-4"
+                  >
+                    <p className="text-xs text-slate-500 mb-2">
+                      Quick questions:
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {visibleQuickQuestions.map((q, i) => (
                         <motion.button
                           key={i}
                           whileHover={{ scale: 1.02 }}
@@ -715,7 +779,16 @@ ${conversationHistory}
 
                     <div className="flex gap-2">
                       <motion.button
-                        onClick={() => setLeadMode(false)}
+                        onClick={() => {
+                          setLeadMode(false);
+                          setVisibleQuickQuestions(
+                            shuffleAndPick(
+                              QUICK_QUESTION_POOL,
+                              4,
+                              askedQuestions
+                            )
+                          );
+                        }}
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         className="flex-1 py-2.5 sm:py-3 rounded-xl font-medium border border-slate-300 text-slate-700 hover:bg-slate-50 transition-all"
