@@ -262,7 +262,7 @@ const WhatWeDoSection = () => {
 
       <div
         className="relative"
-        style={{ height: `${WHAT_WE_DO_STEPS.length * 50}vh` }}
+        style={{ height: `${WHAT_WE_DO_STEPS.length * 70}vh` }}
       >
         <div className="sticky top-0 h-[100vh] w-full overflow-hidden flex items-center">
           {WHAT_WE_DO_STEPS.map((step, index) => {
