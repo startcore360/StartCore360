@@ -62,7 +62,7 @@ function Hero() {
 
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  const PARTICLE_COUNT = isMobile ? 110 : 190;
+  const PARTICLE_COUNT = isMobile ? 60 : 190;
   const prefersReducedMotion =
     typeof window !== "undefined" &&
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;

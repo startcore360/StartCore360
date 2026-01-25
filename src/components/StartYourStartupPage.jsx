@@ -53,7 +53,7 @@ const PageIntroduction = memo(() => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.3 }
+      { threshold: 0.3 },
     );
 
     if (ref.current) observer.observe(ref.current);
@@ -228,6 +228,7 @@ const IntakeForm = memo(() => {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     intent: "",
@@ -242,7 +243,7 @@ const IntakeForm = memo(() => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => setVisible(entry.isIntersecting),
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     if (ref.current) observer.observe(ref.current);
@@ -262,7 +263,7 @@ const IntakeForm = memo(() => {
 
   const intentConfig = useMemo(
     () => getFollowUpQuestions(form.intent),
-    [form.intent]
+    [form.intent],
   );
 
   const progressPercentage = useMemo(() => {
@@ -283,7 +284,9 @@ const IntakeForm = memo(() => {
   }, [form.intent, form.name, isValidEmail]);
 
   const handleSubmit = useCallback(async () => {
-    if (!isRequiredValid) return;
+    if (!isRequiredValid || isSubmitting) return;
+
+    setIsSubmitting(true);
 
     const selectedServices = Object.keys(form.services)
       .filter((k) => form.services[k])
@@ -310,15 +313,17 @@ const IntakeForm = memo(() => {
         "service_5lvd6tk",
         "template_58k01r5",
         templateParams,
-        "0Gpn20Rm8Mm52aeoF"
+        "0Gpn20Rm8Mm52aeoF",
       );
 
       setSubmitted(true);
     } catch (error) {
       console.error("Email send error:", error);
       alert("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
-  }, [form, isRequiredValid]);
+  }, [form, isRequiredValid, isSubmitting]);
 
   return (
     <section ref={ref} className="py-6 sm:py-10 px-4 relative z-10">
@@ -520,23 +525,30 @@ const IntakeForm = memo(() => {
               {/* Submit Button */}
               <FormSection visible>
                 <motion.button
-                  disabled={!isRequiredValid}
+                  disabled={!isRequiredValid || isSubmitting}
                   onClick={handleSubmit}
-                  whileHover={isRequiredValid ? { scale: 1.02, y: -2 } : {}}
-                  whileTap={isRequiredValid ? { scale: 0.98 } : {}}
+                  whileHover={
+                    isRequiredValid && !isSubmitting
+                      ? { scale: 1.02, y: -2 }
+                      : {}
+                  }
+                  whileTap={
+                    isRequiredValid && !isSubmitting ? { scale: 0.98 } : {}
+                  }
                   className={`
-                    w-full rounded-2xl px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg font-semibold 
-                    transition-all duration-300 
-                    flex items-center justify-center gap-3
-                    ${
-                      isRequiredValid
-                        ? "bg-slate-900 text-white shadow-xl hover:shadow-2xl"
-                        : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                    }
-                  `}
+    w-full rounded-2xl px-6 sm:px-8 py-4 sm:py-5 text-base sm:text-lg font-semibold 
+    transition-all duration-300 
+    flex items-center justify-center gap-3
+    ${
+      !isRequiredValid || isSubmitting
+        ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+        : "bg-slate-900 text-white shadow-xl hover:shadow-2xl"
+    }
+  `}
                 >
-                  <span>Send Message</span>
-                  {isRequiredValid && (
+                  <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
+
+                  {!isSubmitting && isRequiredValid && (
                     <svg
                       className="w-5 h-5"
                       fill="none"
